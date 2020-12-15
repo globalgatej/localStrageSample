@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>自動保存</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <style>
+        h1,
+        h2,
+        h3,
+        h4,
+        h5 {
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+        /* alertのフェード表示用 */
+        .fade-enter-active,
+        .fade-leave-active {
+            transition: opacity .5s;
+        }
+
+        .fade-enter,
+        .fade-leave-to {
+            opacity: 0;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="app">
+        <div class="container">
+            <div class="row" v-if="!isLs">
+                <div class="col">
+                    <div class="alert alert-warning">
+                        お使いのブラウザではlocalStrage機能は使用できません。
+                    </div>
+                </div>
+            </div>
+
+
+            <transition name="fade">
+
+                <div class="alert fixed-top alert-success text-center" role="alert" v-if="showAlert">
+                    保存されました。
+                </div>
+            </transition>
+
+            <div class="row" style="margin-top: 100px">
+                <div class="col">
+                    <h1>自動でフォームの入力内容を保存する</h1>
+                    <p>10秒ごとに入力内容を保存しています。</p>
+                </div>
+            </div>
+            <div class="row align-items-center border-top py-3">
+                <div class="col-4">名前</div>
+                <div class="col"><input type="text" class="form-control" v-model="forms.name"></div>
+            </div>
+            <div class="row align-items-center border-top py-3">
+                <div class="col-4">年齢</div>
+                <div class="col">
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" id="age10" v-model="forms.age" value="10">
+                        <label class="form-check-label" for="age10">10代</label>
+                    </div>
+
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" id="age20" v-model="forms.age" value="20">
+                        <label class="form-check-label" for="age20">20代</label>
+                    </div>
+
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" id="age30" v-model="forms.age" value="30">
+                        <label class="form-check-label" for="age30">30代</label>
+                    </div>
+
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" id="age40" v-model="forms.age" value="40">
+                        <label class="form-check-label" for="age40">40代</label>
+                    </div>
+                </div>
+            </div>
+            <div class="row align-items-center border-top py-3">
+                <div class="col-4">住所</div>
+                <div class="col"><input type="text" class="form-control" v-model="forms.address1"><br><input type="text"
+                        class="form-control" v-model="forms.address2"></div>
+            </div>
+            <div class="row align-items-center border-top py-3">
+                <div class="col-4">趣味</div>
+                <div class="col">
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="checkbox" id="hobby1" v-model="forms.hobby" value="釣り">
+                        <label class="form-check-label" for="hobby1">釣り</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="checkbox" id="hobby2" v-model="forms.hobby" value="囲碁・将棋">
+                        <label class="form-check-label" for="hobby2">囲碁・将棋</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="checkbox" id="hobby3" v-model="forms.hobby" value="料理">
+                        <label class="form-check-label" for="hobby3">料理</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="checkbox" id="hobby4" v-model="forms.hobby" value="筋トレ">
+                        <label class="form-check-label" for="hobby4">筋トレ</label>
+                    </div>
+
+                </div>
+            </div>
+
+
+
+        </div>
+    </div>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.12/dist/vue.js"></script>
+    <script>
+        var app = new Vue({
+            el: '#app',
+            data() {
+                return {
+                    isLs: false,
+                    showAlert: false,
+                    forms: {
+                        name: '',
+                        age: '',
+                        address1: '',
+                        address2: '',
+                        hobby: []
+                    }
+
+                }
+            },
+            mounted() {
+                var vm = this;
+                vm.init(); //localStrageが使えるかどうかの判定
+                if (vm.isLs) {
+
+                    //保存済みのlocalStrageを読み込む
+                    var current = window.localStorage.getItem('forms');
+                    if (current) {
+                        vm.$set(vm, 'forms', JSON.parse(current))
+                    }
+
+                    setInterval(function () {
+                        vm.autosave();
+                    }, 10000)
+                }
+            },
+
+            methods: {
+                init() {
+                    var vm = this;
+                    if (typeof window.localStorage !== 'undefined') {
+                        vm.$set(vm, 'isLs', true)
+                    }
+                },
+                //定期実行して保存する
+                autosave() {
+                    var vm = this;
+                    window.localStorage.setItem('forms', JSON.stringify(vm.forms));
+                    vm.$set(vm, 'showAlert', true);
+                    setTimeout(function () {
+                        vm.$set(vm, 'showAlert', false);
+                    }, 1000)
+                }
+            }
+        })
+    </script>
+</body>
+
+</html>

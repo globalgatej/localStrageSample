@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>お気に入り登録できる一覧</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <style>
+        h1,
+        h2,
+        h3,
+        h4,
+        h5 {
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="app">
+        <div class="container">
+            <div class="row" v-if="!isLs">
+                <div class="col">
+                    <div class="alert alert-warning">
+                        お使いのブラウザではlocalStrage機能は使用できません。
+                    </div>
+                </div>
+            </div>
+
+            <div class="row py-3">
+                <div class="col">
+                    <h1>お気に入り登録</h1>
+                    <div>ただいまのお気に入り登録件数は<strong class="display-4 font-weight-bold">{{ favs.length }}</strong>件です。<br>
+                        <a href="yourfav.html">お気に入り一覧を見る</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row border-top py-3 align-items-center" v-for="item in data" :key="item.id">
+                <div class="col">
+                    <h3>{{ item.name}}</h3>
+                    <div>
+                        {{ item.detail}}
+                    </div>
+                </div>
+                <div class="col-auto">
+                    <button class="btn" :class="isFavs(item.id) ?'btn-secondary' : 'btn-primary'"
+                        v-on:click="toggleFavs($event,item.id)">
+                        <template v-if="isFavs(item.id)">
+                            お気に入りから削除
+                        </template>
+                        <template v-else>
+                            お気に入りに追加
+                        </template>
+                    </button>
+                </div>
+            </div>
+
+
+
+
+
+        </div>
+    </div>
+
+
+
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.12/dist/vue.js"></script>
+    <script>
+        var app = new Vue({
+            el: '#app',
+            data() {
+                return {
+                    isLs: false,
+                    favs: [],
+                    data: [{
+                            id: 1,
+                            name: 'ハイツ大阪',
+                            detail: 'これは大阪の物件です。とても住みやすい！'
+                        },
+                        {
+                            id: 2,
+                            name: 'アパートなんば',
+                            detail: 'なんばから徒歩1分！とても住みやすい。'
+                        },
+                        {
+                            id: 3,
+                            name: 'マンション梅田',
+                            detail: '梅田駅チカ！とても住みやすい。'
+                        },
+                        {
+                            id: 4,
+                            name: 'カーサ本町',
+                            detail: '本町すぐそば。とても住みやすい。'
+                        },
+                        {
+                            id: 5,
+                            name: 'キャッスル島之内',
+                            detail: '島之内圏内。とても住みやすい。'
+                        }, {
+                            id: 6,
+                            name: 'ヒルズ彩都',
+                            detail: '彩都の山の上！とても住みやすい。'
+                        }, {
+                            id: 7,
+                            name: 'ビルディング阿波座',
+                            detail: '阿波座の近所。とても住みやすい。'
+                        }, {
+                            id: 8,
+                            name: 'ハウス長堀',
+                            detail: '長堀の地下。とても住みやすい。'
+                        }, {
+                            id: 9,
+                            name: 'ステーション心斎橋',
+                            detail: '心斎橋の橋の上。とても住みやすい。'
+                        },
+                        {
+                            id: 10,
+                            name: 'ルーム北花田',
+                            detail: '北花田？とても住みやすい。'
+                        }
+                    ]
+
+
+                }
+            },
+            computed: {
+
+                //お気に入り登録済みかどうか判定
+                isFavs() {
+                    var vm = this;
+                    return function (id) {
+                        var index = vm.favs.findIndex(function (val) {
+                            return val.id == id;
+                        })
+                        if (index === -1) {
+                            return false;
+                        } else {
+                            return true;
+                        }
+                    }
+                }
+            },
+            mounted() {
+                var vm = this;
+                vm.init(); //localStrageが使えるかどうかの判定
+                if (vm.isLs) {
+
+                    //保存済みのlocalStrageを読み込む
+                    var current = window.localStorage.getItem('favs');
+                    if (current) {
+                        vm.$set(vm, 'favs', JSON.parse(current))
+                    }
+                }
+            },
+
+            methods: {
+                init() {
+                    var vm = this;
+                    if (typeof window.localStorage !== 'undefined') {
+                        vm.$set(vm, 'isLs', true)
+                    }
+                },
+                toggleFavs($event, id) {
+                    var vm = this;
+                    //お気に入り対象がどの物件か抽出
+                    var index = vm.data.findIndex(function (val) {
+                        return val.id == id;
+                    });
+                    var target = vm.data[index];
+
+                    //既に登録済みか判定
+                    var index = vm.favs.findIndex(function (val) {
+                        return val.id == target.id;
+                    })
+                    //見つからなければ新規登録
+                    if (index === -1) {
+                        vm.favs.unshift(target)
+                    } else {
+                        //見つかれば削除
+                        vm.favs.splice(index, 1);
+                    }
+
+                    //localStrageに保存
+                    window.localStorage.setItem('favs', JSON.stringify(vm.favs));
+                }
+            }
+        })
+    </script>
+</body>
+
+</html>

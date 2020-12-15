@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>お気に入り一覧</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <style>
+        h1,
+        h2,
+        h3,
+        h4,
+        h5 {
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="app">
+        <div class="container">
+            <div class="row" v-if="!isLs">
+                <div class="col">
+                    <div class="alert alert-warning">
+                        お使いのブラウザではlocalStrage機能は使用できません。
+                    </div>
+                </div>
+            </div>
+
+            <div class="row py-3">
+                <div class="col">
+                    <h1>お気に入り一覧</h1>
+                    <div>ただいまのお気に入り登録件数は<strong class="display-4 font-weight-bold">{{ favs.length }}</strong>件です。 </div>
+                </div>
+            </div>
+
+            <div class="row border-top py-3 align-items-center" v-for="item in favs" :key="item.id">
+                <div class="col">
+                    <h3>{{ item.name}}</h3>
+                    <div>
+                        {{ item.detail}}
+                    </div>
+                </div>
+            </div>
+
+
+
+
+
+        </div>
+    </div>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.12/dist/vue.js"></script>
+    <script>
+        var app = new Vue({
+            el: '#app',
+            data() {
+                return {
+                    isLs: false,
+                    favs: [],
+                }
+            },
+            mounted() {
+                var vm = this;
+                vm.init(); //localStrageが使えるかどうかの判定
+                if (vm.isLs) {
+
+                    //保存済みのlocalStrageを読み込む
+                    var current = window.localStorage.getItem('favs');
+                    if (current) {
+                        vm.$set(vm, 'favs', JSON.parse(current))
+                    }
+                }
+            },
+
+            methods: {
+                init() {
+                    var vm = this;
+                    if (typeof window.localStorage !== 'undefined') {
+                        vm.$set(vm, 'isLs', true)
+                    }
+                }
+            }
+        })
+    </script>
+
+</body>
+
+</html>
